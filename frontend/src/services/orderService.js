@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/Myecommerce/api/orders";
+const BASE_URL = "http://localhost:8083/api/orders";
 
 export async function fetchOrders(page = 1, size = 10) {
   const res = await fetch(`${BASE_URL}?page=${page}&size=${size}`);
