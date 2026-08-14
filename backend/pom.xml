@@ -12,43 +12,58 @@
     </parent>
 
     <groupId>org.course</groupId>
-    <artifactId>Myecommerce</artifactId>
+    <artifactId>myecommerce-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>myapp-springboot</name>
-    <description>Spring Boot replica of the Northwind ecommerce REST API (MyAppDataLayer/MyAppServiceLayer/MyAppWeb)</description>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
+    <name>myecommerce-parent</name>
+    <description>Multi-module Spring Boot replica of the Northwind ecommerce REST API, split into one module per domain (Category, Employee, Order, OrderDetails, Product) plus a shared common module and an app module that assembles the runnable jar.</description>
 
     <properties>
         <java.version>21</java.version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>ecommerce-common</module>
+        <module>ecommerce-category</module>
+        <module>ecommerce-employee</module>
+        <module>ecommerce-order</module>
+        <module>ecommerce-product</module>
+        <module>ecommerce-orderdetails</module>
+        <module>ecommerce-app</module>
+    </modules>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.course</groupId>
+                <artifactId>ecommerce-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.course</groupId>
+                <artifactId>ecommerce-category</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.course</groupId>
+                <artifactId>ecommerce-employee</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.course</groupId>
+                <artifactId>ecommerce-order</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.course</groupId>
+                <artifactId>ecommerce-product</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.course</groupId>
+                <artifactId>ecommerce-orderdetails</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
