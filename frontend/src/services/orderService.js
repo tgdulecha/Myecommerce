@@ -38,7 +38,7 @@ export async function deleteOrder(id) {
   });
   if (!res.ok) throw new Error("Delete failed");
 }
-export async function isShipped(order) {
+export function isShipped(order) {
   if (!order.shippedDate) return false;
 
   const today = new Date();

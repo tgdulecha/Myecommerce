@@ -296,6 +296,20 @@ input {
   border-radius: 4px;
 }
 
+.page-input {
+  width: 42px;
+  text-align: center;
+  padding: 2px 4px;
+}
+
+.detail-input {
+  width: 90px;
+  text-align: right;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 @media (max-width: 768px) {
   /* Layout diventa colonna */
   .layout-body {
