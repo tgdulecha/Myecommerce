@@ -1,14 +1,18 @@
+import { authHeader } from "@/js/auth.js";
+
 const BASE_URL = "http://localhost:8083/api/orders";
 
 export async function fetchOrders(page = 1, size = 10) {
-  const res = await fetch(`${BASE_URL}?page=${page}&size=${size}`);
+  const res = await fetch(`${BASE_URL}?page=${page}&size=${size}`, {
+    headers: { ...authHeader() },
+  });
   if (!res.ok) throw new Error("Failed to fetch orders");
   return await res.json();
   // { content, page, pageSize, totalElements, totalPages }
 }
 
 export async function fetchOrderById(id) {
-  const res = await fetch(`${BASE_URL}/${id}`);
+  const res = await fetch(`${BASE_URL}/${id}`, { headers: { ...authHeader() } });
   if (!res.ok) throw new Error("Order not found");
   return res.json();
 }
@@ -16,7 +20,7 @@ export async function fetchOrderById(id) {
 export async function createOrder(order) {
   const res = await fetch(BASE_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeader() },
     body: JSON.stringify(order),
   });
   if (!res.ok) throw new Error("Create failed");
@@ -26,7 +30,7 @@ export async function createOrder(order) {
 export async function updateOrder(order) {
   const res = await fetch(`${BASE_URL}/${order.orderId}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeader() },
     body: JSON.stringify(order),
   });
   if (!res.ok) throw new Error("Update failed");
@@ -35,6 +39,7 @@ export async function updateOrder(order) {
 export async function deleteOrder(id) {
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
+    headers: { ...authHeader() },
   });
   if (!res.ok) throw new Error("Delete failed");
 }

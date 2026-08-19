@@ -1,3 +1,5 @@
+import { authHeader } from "@/js/auth.js";
+
 const BASE_URL = 'http://localhost:8083/api/orderdetails';
 
 // ==================================================
@@ -9,7 +11,9 @@ const BASE_URL = 'http://localhost:8083/api/orderdetails';
 // GET /api/orderdetails?page=1&size=15
 // ----------------------------------
 export async function fetchAllOrderDetails(page = 1, size = 15) {
-  const res = await fetch(`${BASE_URL}?page=${page}&size=${size}`);
+  const res = await fetch(`${BASE_URL}?page=${page}&size=${size}`, {
+    headers: { ...authHeader() },
+  });
 
   if (!res.ok) {
     throw new Error('Failed to fetch order details page');
@@ -23,14 +27,14 @@ export async function fetchAllOrderDetails(page = 1, size = 15) {
 // GET /api/orderdetails?orderId=10248
 // ----------------------------------
 export async function fetchOrderDetailsByOrderId(orderId) {
-const res = await fetch(`${BASE_URL}/${orderId}`);
+const res = await fetch(`${BASE_URL}/${orderId}`, { headers: { ...authHeader() } });
 
   if (!res.ok) {
     throw new Error('Failed to fetch order details for order');
   }
 
   return res.json();
-  
+
 }
 
 // ----------------------------------
@@ -38,7 +42,9 @@ const res = await fetch(`${BASE_URL}/${orderId}`);
 // GET /api/orderdetails/{orderId}/{productId}
 // ----------------------------------
 export async function fetchOrderDetail(orderId, productId) {
-  const res = await fetch(`${BASE_URL}/${orderId}/${productId}`);
+  const res = await fetch(`${BASE_URL}/${orderId}/${productId}`, {
+    headers: { ...authHeader() },
+  });
 
   if (!res.ok) {
     throw new Error('Order detail not found');
@@ -59,7 +65,8 @@ export async function createOrderDetail(detail) {
   const res = await fetch(BASE_URL, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...authHeader(),
     },
     body: JSON.stringify(detail)
   });
@@ -85,7 +92,8 @@ export async function updateOrderDetail(detail) {
     {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...authHeader(),
       },
       body: JSON.stringify(detail)
     }
@@ -106,7 +114,8 @@ export async function updateOrderDetail(detail) {
 // ----------------------------------
 export async function deleteOrderDetail(orderId, productId) {
   const res = await fetch(`${BASE_URL}/${orderId}/${productId}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: { ...authHeader() },
   });
 
   if (!res.ok) {
