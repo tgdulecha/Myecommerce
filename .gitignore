@@ -49,6 +49,11 @@ frontend/cypress/videos/
 frontend/cypress/screenshots/
 frontend/__screenshots__/
 
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.cache/
+
 # Logs
 
 # Editor / IDE
