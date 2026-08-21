@@ -8,12 +8,14 @@ so only ever point this at `NorthWind_clone`, never the real `NorthWind` databas
 
 ## Prerequisites
 
-1. The schema from `../src/test/resources/sql/northwind_clone_schema.sql` exists
-   in `NorthWind_clone`.
-2. The backend is running **against that database**, not the real one:
+1. The schema from `../auth-service/src/test/resources/sql/northwind_clone_schema.sql`
+   exists in `NorthWind_clone` (same schema `ecommerce-service`'s copy uses - it's one
+   shared database for now).
+2. `auth-service` is running **against that database**, not the real one - this
+   collection only exercises `/api/auth`, which now lives there (port 8082):
 
    ```bash
-   cd ../..
+   cd ../auth-service
    SPRING_PROFILES_ACTIVE=test DB_USERNAME=... DB_PASSWORD=... mvn spring-boot:run
    ```
 
