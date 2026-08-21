@@ -15,4 +15,11 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  test: {
+    environment: 'happy-dom',
+    globals: true,
+    // Scoped to src/ so this never picks up the Playwright specs in tests/e2e,
+    // which use a different test runner/API and aren't Vitest-compatible.
+    include: ['src/**/*.{test,spec}.{js,mjs,cjs}'],
+  },
 })

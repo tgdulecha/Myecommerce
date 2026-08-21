@@ -1,0 +1,10 @@
+{
+  "name": "api-tests",
+  "private": true,
+  "scripts": {
+    "test:api": "newman run auth.postman_collection.json -e local.postman_environment.json"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1"
+  }
+}
