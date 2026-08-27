@@ -27,6 +27,7 @@
     <modules>
         <module>auth-service</module>
         <module>ecommerce-service</module>
+        <module>payment-service</module>
     </modules>
 
     <!-- Shared version pins for dependencies not already managed by spring-boot-starter-parent,

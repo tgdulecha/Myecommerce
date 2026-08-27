@@ -7,7 +7,7 @@
       <aside class="sidebar">
         <h3 class="section-title">List of Orders</h3>
 
-        <div>
+        <transition-group tag="div" name="order-item">
           <div v-for="(order, index) in orders.content" :key="order.orderId"
             :class="['order-item', { active: index === selectedIndex }]" @click="selectOrder(order, index)">
 
@@ -16,7 +16,7 @@
               {{ isShipped(order) ? "Shipped" : "Not Shipped" }}
             </button>
           </div>
-        </div>
+        </transition-group>
 
         <div>
           <button :disabled="currentPage === 1 || loadingOrders" @click="prevPage">
@@ -55,7 +55,8 @@
         <!-- Order Details -->
 
         <section>
-          <div v-if="selectedOrder" class="order-form">
+          <transition name="fade" mode="out-in">
+          <div v-if="selectedOrder" class="order-form" key="order-form">
             <div class="form-grid">
               <div class="form-group">
                 <label>Order Date</label>
@@ -117,10 +118,11 @@
           </div>
 
           <!-- EMPTY STATE -->
-          <div v-else class="box-content text-center">
+          <div v-else class="box-content text-center" key="empty-state">
             <h3>No order selected</h3>
             <button class="btn-green">Add order</button>
           </div>
+          </transition>
         </section>
 
         <!-- Order Form -->
@@ -133,7 +135,7 @@
             No order details
           </div>
 
-          <div v-else class="details-grid">
+          <transition-group v-else tag="div" class="details-grid" name="detail-card">
             <div v-for="detail in orderDetails" :key="detail.orderId + '-' + detail.productId" class="detail-card">
               <template v-if="editingDetailKey === detailKey(detail)">
                 <div class="detail-row">
@@ -208,7 +210,7 @@
               </template>
             </div>
 
-            <div v-if="isAddingDetail" class="detail-card">
+            <div v-if="isAddingDetail" key="new-detail-draft" class="detail-card">
               <div class="detail-row">
                 <span class="label">Product ID</span>
                 <input type="number" min="1" class="detail-input" v-model.number="newDetailDraft.productId" placeholder="Product ID" />
@@ -234,7 +236,75 @@
                 <button @click="cancelAddDetail">Cancel</button>
               </div>
             </div>
+          </transition-group>
+        </section>
+
+        <!-- Payments -->
+        <section class="order-form-box" v-if="selectedOrder">
+          <h3 class="section-title">Payments</h3>
+
+          <div v-if="loadingPayments" class="empty-state">
+            Loading payments…
           </div>
+
+          <transition-group v-else tag="div" class="details-grid" name="detail-card">
+            <div v-for="payment in payments" :key="payment.paymentId" class="detail-card">
+              <div class="detail-row">
+                <span class="label">Method</span>
+                <span class="value">{{ payment.method }}</span>
+              </div>
+
+              <div class="detail-row">
+                <span class="label">Amount</span>
+                <span class="value">{{ Number(payment.amount).toFixed(2) }}</span>
+              </div>
+
+              <div class="detail-row">
+                <span class="label">Status</span>
+                <span class="value">
+                  <button :class="paymentStatusClass(payment)">{{ payment.status }}</button>
+                </span>
+              </div>
+
+              <div class="detail-row">
+                <span class="label">Date</span>
+                <span class="value">
+                  {{ payment.transactionDate ? new Date(payment.transactionDate).toLocaleString() : "—" }}
+                </span>
+              </div>
+
+              <div class="card-actions" v-if="payment.status === 'PENDING'">
+                <button @click="setPaymentStatus(payment, 'COMPLETED')">Mark Completed</button>
+                <button @click="setPaymentStatus(payment, 'FAILED')">Mark Failed</button>
+              </div>
+            </div>
+
+            <div key="new-payment-draft" class="detail-card">
+              <div class="detail-row">
+                <span class="label">Method</span>
+                <select class="detail-input" v-model="newPaymentDraft.method">
+                  <option value="CreditCard">Credit Card</option>
+                  <option value="PayPal">PayPal</option>
+                  <option value="BankTransfer">Bank Transfer</option>
+                </select>
+              </div>
+
+              <div class="detail-row">
+                <span class="label">Amount</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  class="detail-input"
+                  v-model.number="newPaymentDraft.amount"
+                />
+              </div>
+
+              <div class="card-actions">
+                <button @click="addPayment">Add Payment</button>
+              </div>
+            </div>
+          </transition-group>
         </section>
       </main>
     </div>
@@ -250,9 +320,17 @@ import {
   updateOrderDetail,
   deleteOrderDetail,
 } from "@/services/orderDetailService";
+import {
+  fetchPaymentsByOrderId,
+  createPayment,
+  updatePaymentStatus,
+  paymentStatusClass,
+} from "@/services/paymentService";
+import { useAuth } from "@/js/auth.js";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+const { currentAccount } = useAuth();
 
 const goToNewOrder = () => {
   router.push("/new-order");
@@ -280,6 +358,10 @@ const editingDetailKey = ref(null);
 const detailDraft = ref({ unitPrice: 0, quantity: 1, discountPercent: 0 });
 const isAddingDetail = ref(false);
 const newDetailDraft = ref({ productId: null, unitPrice: 0, quantity: 1, discountPercent: 0 });
+
+const payments = ref([]);
+const loadingPayments = ref(false);
+const newPaymentDraft = ref({ method: "CreditCard", amount: null });
 const disableNext = computed(() => {
   return (
     loadingOrders.value || orders.value.content.length<pageSize.value
@@ -310,6 +392,48 @@ async function selectOrder(order, index) {
     orderDetails.value = [];
   } finally {
     loadingDetails.value = false;
+  }
+
+  await loadPayments(order.orderId);
+}
+
+async function loadPayments(orderId) {
+  loadingPayments.value = true;
+  try {
+    payments.value = await fetchPaymentsByOrderId(orderId);
+  } catch {
+    payments.value = [];
+  } finally {
+    loadingPayments.value = false;
+  }
+}
+
+async function addPayment() {
+  if (!newPaymentDraft.value.amount || newPaymentDraft.value.amount <= 0) {
+    alert("Amount must be greater than zero");
+    return;
+  }
+
+  try {
+    await createPayment({
+      orderId: selectedOrder.value.orderId,
+      customerEmail: currentAccount.value?.email,
+      amount: newPaymentDraft.value.amount,
+      method: newPaymentDraft.value.method,
+    });
+    newPaymentDraft.value = { method: "CreditCard", amount: null };
+    await loadPayments(selectedOrder.value.orderId);
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+async function setPaymentStatus(payment, status) {
+  try {
+    await updatePaymentStatus(payment.paymentId, status);
+    await loadPayments(selectedOrder.value.orderId);
+  } catch (e) {
+    alert(e.message);
   }
 }
 
@@ -347,6 +471,7 @@ async function deleteSelectedOrder() {
     selectedOrder.value = null;
     selectedIndex.value = null;
     orderDetails.value = [];
+    payments.value = [];
     editval.value = true;
     await loadOrders();
   } catch (e) {
@@ -474,3 +599,99 @@ onMounted(loadOrders);
 
 <!-- External CSS -->
 <style scoped src="../css/OrderManagement.css"></style>
+
+<style scoped>
+.main-header {
+  animation: fadeInDown 0.4s ease both;
+}
+
+.sidebar {
+  animation: fadeIn 0.4s ease both;
+}
+
+/* Order list */
+.order-item {
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.order-item:hover {
+  transform: translateX(4px);
+  box-shadow: inset 3px 0 0 #1c3fb1;
+}
+
+.order-item-enter-active,
+.order-item-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.order-item-enter-from,
+.order-item-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+.order-item-move {
+  transition: transform 0.25s ease;
+}
+
+/* Order panel / empty state cross-fade */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+/* Detail cards */
+.detail-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.detail-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+
+.detail-card-enter-active,
+.detail-card-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.detail-card-enter-from,
+.detail-card-leave-to {
+  opacity: 0;
+  transform: scale(0.96);
+}
+.detail-card-move {
+  transition: transform 0.25s ease;
+}
+
+/* Buttons */
+button {
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+</style>

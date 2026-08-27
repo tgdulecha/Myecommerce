@@ -296,6 +296,22 @@ input {
   border-radius: 4px;
 }
 
+.btn-red {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.btn-grey {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
 .page-input {
   width: 42px;
   text-align: center;
