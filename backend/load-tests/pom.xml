@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Deliberately NOT parented to backend-parent (whose own parent is
+         spring-boot-starter-parent) and NOT listed in backend/pom.xml's <modules>.
+         Spring Boot's parent BOM pins Netty/Jackson/Scala versions that Gatling's
+         highcharts bundle brings its own matched set of - inheriting that BOM here
+         risks silently mismatched jars (e.g. NoSuchMethodError in Netty) that would
+         never show up in the app modules, only when Gatling's engine starts up.
+         Kept alongside the services physically for discoverability, built and run
+         independently of `mvn install` at the backend/ root. -->
+    <groupId>org.course</groupId>
+    <artifactId>load-tests</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>load-tests</name>
+    <description>Gatling simulations exercising auth-service, ecommerce-service and
+        payment-service together as a black box over HTTP. Not part of the normal
+        mvn install/test/verify build - gatling:test is not bound to any lifecycle
+        phase here, so it only runs when invoked explicitly.
+    </description>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <gatling.version>3.13.5</gatling.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.gatling.highcharts</groupId>
+            <artifactId>gatling-charts-highcharts</artifactId>
+            <version>${gatling.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.gatling</groupId>
+                <artifactId>gatling-maven-plugin</artifactId>
+                <version>4.16.3</version>
+                <!-- No <executions> binding gatling:test to a phase on purpose - run it
+                     explicitly with -DsimulationClass=... (see README.md) rather than
+                     having it fire during mvn test/verify. -->
+            </plugin>
+        </plugins>
+    </build>
+</project>
