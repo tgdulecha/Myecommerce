@@ -1,0 +1,48 @@
+services:
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: auth-service
+    ports:
+      - "8082:8082"
+    environment:
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      # localhost inside a container means the container itself, not the host's SQL Server -
+      # host.docker.internal reaches the host machine instead. Overriding SPRING_DATASOURCE_URL
+      # works via Spring Boot's relaxed env binding, no code change needed.
+      SPRING_DATASOURCE_URL: jdbc:sqlserver://host.docker.internal:1433;databaseName=NorthWind;encrypt=false;trustServerCertificate=true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: payment-service/Dockerfile
+    container_name: payment-service
+    ports:
+      - "8084:8084"
+    environment:
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      SPRING_DATASOURCE_URL: jdbc:sqlserver://host.docker.internal:1433;databaseName=NorthWind;encrypt=false;trustServerCertificate=true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  ecommerce-service:
+    build:
+      context: .
+      dockerfile: ecommerce-service/Dockerfile
+    container_name: ecommerce-service
+    ports:
+      - "8083:8083"
+    environment:
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      SPRING_DATASOURCE_URL: jdbc:sqlserver://host.docker.internal:1433;databaseName=NorthWind;encrypt=false;trustServerCertificate=true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
