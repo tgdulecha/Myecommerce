@@ -1,5 +1,6 @@
 # --- Backend (Maven, multi-module) ---
 backend/*/target/
+backend/.env
 # Logs
 logs
 *.log
