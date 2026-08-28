@@ -6,6 +6,7 @@ import org.course.authservice.dto.LoginRequestDto;
 import org.course.authservice.dto.RegisterRequestDto;
 import org.course.authservice.security.JwtService;
 import org.course.authservice.service.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,7 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AccountDto> register(@RequestBody RegisterRequestDto request) {
+    public ResponseEntity<AccountDto> register(@Valid @RequestBody RegisterRequestDto request) {
         AccountDto created = accountService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
