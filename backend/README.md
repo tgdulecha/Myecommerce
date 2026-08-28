@@ -79,6 +79,11 @@ with a single `docker-compose.yml` at the reactor root.
 | `ecommerce-service`  | `ecommerce-service/Dockerfile`  | 8083      |
 | `payment-service`    | `payment-service/Dockerfile`    | 8084      |
 
+Docker Desktop must be running first - open it from the Start menu (or run
+`Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"` in PowerShell) and
+wait for it to report "Engine running" before using any `docker compose` command
+below.
+
 SQL Server itself is **not** containerized - all three services connect out to
 whatever `NorthWind` instance is already running on your machine, same as running
 them bare-metal. Run
@@ -98,28 +103,25 @@ cp .env.example .env
 The defaults in `.env.example` already match the dev credentials above - edit `.env`
 if yours differ. `.env` is gitignored; never commit real credentials into it.
 
-### 2. Build
+### 2. Build and run
 
 ```bash
-docker compose build
+docker compose up --build
 ```
 
-Builds all three images. Build (or rebuild) just one:
+Builds all three images and starts the containers in one step, each publishing the
+same port it uses bare-metal (8082/8083/8084). `--build` forces a rebuild first, so
+this is the command to reach for after pulling changes or editing a Dockerfile - drop
+it for a plain restart on already-built images (`docker compose up`).
+
+Other useful variants:
 
 ```bash
-docker compose build auth-service
+docker compose up --build -d        # detached (background)
+docker compose up --build auth-service   # just one service
+docker compose build auth-service        # build only, don't start
+docker compose down                      # stop and remove containers
 ```
-
-### 3. Run
-
-```bash
-docker compose up
-```
-
-Starts all three containers, each publishing the same port it uses bare-metal
-(8082/8083/8084). Useful flags: `-d` to run detached, `--build` to rebuild first.
-Run just one service: `docker compose up --build auth-service`. Stop everything with
-`docker compose down`.
 
 ### How a single Dockerfile builds one module out of the Maven reactor
 
