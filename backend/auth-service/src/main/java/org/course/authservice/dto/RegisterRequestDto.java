@@ -1,12 +1,15 @@
 package org.course.authservice.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class RegisterRequestDto {
 
-    private String email;
-    private String password;
+    private @NotBlank @Email String email;
+    private @NotBlank String password;
     private String companyName;
     private String contactName;
-    private String contactTitle;
+    private String contactTitle; 
     private String address;
     private String city;
     private String region;
