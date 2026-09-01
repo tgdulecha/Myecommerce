@@ -1,6 +1,14 @@
 # --- Backend (Maven, multi-module) ---
 backend/*/target/
 backend/.env
+
+# --- Mobile (Android/Gradle) ---
+mobile/**/build/
+mobile/.gradle/
+mobile/local.properties
+mobile/**/*.apk
+mobile/**/*.aab
+mobile/**/.cxx/
 # Logs
 logs
 *.log
