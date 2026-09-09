@@ -3,6 +3,7 @@ package org.course.ecommerce.controller;
 import org.course.ecommerce.dto.OrderDto;
 import org.course.ecommerce.dto.PageDto;
 import org.course.ecommerce.service.OrderService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +53,10 @@ public class OrderController {
         if (order == null)
             return ResponseEntity.badRequest().build();
 
-        orderService.addOrder(order);
+        boolean created = orderService.addOrder(order);
+        if (!created)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
         URI location = URI.create("/api/orders/" + order.getOrderId());
         return ResponseEntity.created(location).build();
     }
