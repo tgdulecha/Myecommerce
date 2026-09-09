@@ -49,7 +49,6 @@ public class OrderServiceImpl implements OrderService {
     public boolean addOrder(OrderDto order) {
         if (order == null)
             throw new IllegalArgumentException("Order cannot be null");
-
         Orders entity = OrderMapper.toEntity(order);
         entity.setOrderId(0);
         Orders saved = ordersRepository.save(entity);
